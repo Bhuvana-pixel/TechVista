@@ -1,0 +1,11 @@
+name,category,description,website
+Generative AI,Artificial Intelligence,"Large foundational models transforming text, video, software synthesis, and multi-modal creative production.",https://techvista.ai/tech/genai
+Artificial Intelligence,Core Computing,"Broad AI encompassing machine learning, deep neural networks, reinforcement learning, and autonomous reasoning systems.",https://techvista.ai/tech/ai
+Robotics & Embodied AI,Automation,Humanoid robots and physical automation systems integrating multi-modal perception with end-to-end motor control.,https://techvista.ai/tech/robotics
+Quantum Computing,Frontier Physics,"Superconducting and ion-trap quantum hardware solving complex combinatorial optimization, cryptography, and molecular simulation.",https://techvista.ai/tech/quantum
+Edge Computing,Infrastructure,Decentralized computing architecture processing low-latency inferencing at device perimeter nodes.,https://techvista.ai/tech/edge
+Cloud Computing,Enterprise Systems,"Hyperscale distributed infrastructure providing elastic compute, serverless frameworks, and high-performance clusters.",https://techvista.ai/tech/cloud
+Cybersecurity & Zero Trust,Security,"AI-driven defensive telemetry, automated anomaly mitigation, and post-quantum cryptographic standards.",https://techvista.ai/tech/cyber
+Autonomous Vehicles,Transportation,Level 4 and Level 5 autonomous driving stacks driven by vision end-to-end foundation models.,https://techvista.ai/tech/av
+AR / VR & Spatial Computing,Human-Machine Interface,"High-fidelity pass-through headsets, spatial audio, and neural interfaces bridging physical and synthetic environments.",https://techvista.ai/tech/spatial
+6G & Next-Gen Connectivity,Telecommunications,"Terahertz-band telecommunications featuring integrated sensing, microsecond latency, and satellite mesh networking.",https://techvista.ai/tech/6g

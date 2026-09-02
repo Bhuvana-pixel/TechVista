@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: techvista-backend
+    env: python
+    region: oregon
+    plan: free
+    rootDir: backend
+    healthCheckPath: /api/health
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: techvista-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
+      - key: ALLOWED_ORIGINS
+        value: "http://localhost:3000,https://techvista.vercel.app"
+
+databases:
+  - name: techvista-db
+    plan: free
+    region: oregon
+    databaseName: techvista
+    user: techvista_admin
