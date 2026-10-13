@@ -14,6 +14,7 @@ def get_company_rankings(
     search: Optional[str] = Query(None),
     industry: Optional[str] = Query(None),
     country: Optional[str] = Query(None),
+    state: Optional[str] = Query(None),
     min_score: Optional[float] = Query(None),
     max_score: Optional[float] = Query(None),
     min_growth: Optional[float] = Query(None),
@@ -51,6 +52,7 @@ def get_company_rankings(
             "ticker": c.ticker,
             "industry": c.industry,
             "country": c.country,
+            "state": c.state,
             "leadership_score": score,
             "future_potential": future_pot,
             "probability": prob,
@@ -59,8 +61,14 @@ def get_company_rankings(
             "revenue_growth": rev_growth
         })
 
-    # Base sort by score descending for default rank
-    items.sort(key=lambda x: x["leadership_score"], reverse=True)
+    # Base multi-tier composite sort (Score -> Future Potential -> Probability -> Scale -> Name)
+    items.sort(key=lambda x: (
+        -x["leadership_score"],
+        -x.get("future_potential", 0.0),
+        -x.get("probability", 0.0),
+        -x.get("market_cap", 0.0),
+        x["name"]
+    ))
     for idx, it in enumerate(items):
         it["rank"] = idx + 1
 
@@ -74,6 +82,8 @@ def get_company_rankings(
         if industry and it["industry"] != industry:
             continue
         if country and it["country"] != country:
+            continue
+        if state and it.get("state") != state:
             continue
         if min_score is not None and it["leadership_score"] < min_score:
             continue
@@ -146,7 +156,13 @@ def get_technology_rankings(
             "adoption_rate": adopt_rate
         })
 
-    items.sort(key=lambda x: x["leadership_score"], reverse=True)
+    items.sort(key=lambda x: (
+        -x["leadership_score"],
+        -x.get("future_potential", 0.0),
+        -x.get("probability", 0.0),
+        -x.get("market_size", 0.0),
+        x["name"]
+    ))
     for idx, it in enumerate(items):
         it["rank"] = idx + 1
 

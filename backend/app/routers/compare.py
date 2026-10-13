@@ -44,6 +44,7 @@ def compare_companies(
             "ticker": comp.ticker,
             "industry": comp.industry,
             "country": comp.country,
+            "state": comp.state,
             "logo_url": comp.logo_url,
             "leadership_score": calc["leadership_score"],
             "future_potential": pred_2030.future_potential if pred_2030 else round(calc["leadership_score"] * 1.05, 1),

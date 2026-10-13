@@ -83,13 +83,13 @@ export default function DashboardPage() {
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-700">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>Multi-Indicator Leadership Intelligence</span>
+              <span>IT & Software Technology Intelligence</span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
-              See the Technology Leaders of <span className="gradient-text">Tomorrow.</span>
+              See the IT & Software Leaders of <span className="gradient-text">Tomorrow.</span>
             </h1>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Evaluating global corporate titans and breakthrough technologies across financial velocity, R&D intensity, patents, enterprise adoption, and 10–15 year horizon ML forecasting.
+              Evaluating global IT corporations, Enterprise SaaS leaders, Hyperscale Cloud providers, and Software Technology innovations across R&D velocity, patents, enterprise adoption, and 10–15 year horizon ML forecasting.
             </p>
           </div>
 

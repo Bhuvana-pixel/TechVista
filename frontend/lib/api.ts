@@ -10,6 +10,9 @@ import {
   DataSourceItem,
   ModelVersionItem,
   SystemStatus,
+  GeoCompaniesResponse,
+  GeoTechnologiesResponse,
+  GeoOverviewResponse,
 } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
@@ -85,6 +88,10 @@ class ApiService {
   }
 
   // Companies
+  public static async getCompanyLocations(): Promise<{ countries: string[]; states: Record<string, string[]> }> {
+    return this.request("/companies/locations");
+  }
+
   public static async getCompanies(query?: string): Promise<Company[]> {
     return this.request(`/companies${query ? `?${query}` : ""}`);
   }
@@ -118,6 +125,23 @@ class ApiService {
 
   public static async getTechnologyForecast(id: number): Promise<ForecastResponse> {
     return this.request(`/forecasts/technology/${id}`);
+  }
+
+  public static async getForecastLeaderboard(params?: string): Promise<any> {
+    return this.request(`/forecasts/leaderboard${params ? `?${params}` : ""}`);
+  }
+
+  // Geographic Insights
+  public static async getGeoCompanies(params?: string): Promise<GeoCompaniesResponse> {
+    return this.request(`/geographic/companies${params ? `?${params}` : ""}`);
+  }
+
+  public static async getGeoTechnologies(params?: string): Promise<GeoTechnologiesResponse> {
+    return this.request(`/geographic/technologies${params ? `?${params}` : ""}`);
+  }
+
+  public static async getGeoOverview(params?: string): Promise<GeoOverviewResponse> {
+    return this.request(`/geographic/overview${params ? `?${params}` : ""}`);
   }
 
   // Comparison

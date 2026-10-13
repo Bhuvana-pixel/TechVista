@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List, Optional, Dict
 import json
 
 from app.database import get_db
@@ -10,13 +10,39 @@ from app.services.scoring import ScoringEngine
 
 router = APIRouter(prefix="/companies", tags=["Companies"])
 
+@router.get("/locations")
+def get_company_locations(db: Session = Depends(get_db)):
+    """Returns available countries and dynamic mapping of state/provinces per country."""
+    companies = db.query(Company.country, Company.state).all()
+    countries_set = set()
+    states_by_country: Dict[str, set] = {}
+
+    for country, state in companies:
+        if country:
+            countries_set.add(country)
+            if country not in states_by_country:
+                states_by_country[country] = set()
+            if state:
+                states_by_country[country].add(state)
+
+    sorted_countries = sorted(list(countries_set))
+    sorted_states_map = {
+        c: sorted(list(states)) for c, states in states_by_country.items()
+    }
+
+    return {
+        "countries": sorted_countries,
+        "states": sorted_states_map
+    }
+
 @router.get("", response_model=List[CompanyOut])
 def get_companies(
     search: Optional[str] = Query(None, description="Search by name or ticker"),
     industry: Optional[str] = Query(None, description="Filter by industry"),
     country: Optional[str] = Query(None, description="Filter by country"),
+    state: Optional[str] = Query(None, description="Filter by state or province"),
     skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=100),
+    limit: int = Query(1000, ge=1, le=2000),
     db: Session = Depends(get_db)
 ):
     query = db.query(Company)
@@ -27,6 +53,8 @@ def get_companies(
         query = query.filter(Company.industry == industry)
     if country:
         query = query.filter(Company.country == country)
+    if state:
+        query = query.filter(Company.state == state)
 
     companies = query.all()
 
@@ -73,6 +101,7 @@ def get_companies(
             industry=c.industry,
             sector=c.sector,
             country=c.country,
+            state=c.state,
             website=c.website,
             description=c.description,
             logo_url=c.logo_url,

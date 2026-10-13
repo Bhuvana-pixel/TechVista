@@ -21,12 +21,14 @@ interface EntityKey {
 interface RadarComparisonChartProps {
   data: any[];
   entityKeys: EntityKey[];
+  angleKey?: string;
   height?: number;
 }
 
 export default function RadarComparisonChart({
   data,
   entityKeys,
+  angleKey = "indicator",
   height = 360,
 }: RadarComparisonChartProps) {
   const [isMounted, setIsMounted] = useState(false);
@@ -52,7 +54,7 @@ export default function RadarComparisonChart({
         <RadarChart data={data}>
           <PolarGrid stroke="#e2e8f0" />
           <PolarAngleAxis
-            dataKey="subject"
+            dataKey={angleKey}
             tick={{ fill: "#475569", fontSize: 11, fontWeight: 500 }}
           />
           <PolarRadiusAxis

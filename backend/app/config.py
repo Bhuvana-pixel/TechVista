@@ -1,8 +1,10 @@
 import os
 from typing import List
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(case_sensitive=True, env_file=".env")
+
     PROJECT_NAME: str = "TechVista"
     VERSION: str = "1.0.0"
     API_PREFIX: str = "/api"
@@ -29,9 +31,5 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> List[str]:
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
-
-    class Config:
-        case_sensitive = True
-        env_file = ".env"
 
 settings = Settings()

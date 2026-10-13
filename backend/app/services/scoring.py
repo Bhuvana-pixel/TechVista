@@ -37,16 +37,16 @@ class ScoringEngine:
         """
         w = weights or cls.DEFAULT_COMPANY_WEIGHTS
 
-        # Defaults if cohort_stats not provided
+        # Defaults if cohort_stats not provided (scaled to realistic enterprise maximums)
         stats = cohort_stats or {
-            "rev_growth_min": -20.0, "rev_growth_max": 80.0,
-            "margin_min": -20.0, "margin_max": 50.0,
-            "mcap_min": 10.0, "mcap_max": 3500.0, # Billion USD
-            "mkt_share_min": 0.0, "mkt_share_max": 80.0,
-            "inv_min": 0.5, "inv_max": 50.0,
-            "rd_min": 0.5, "rd_max": 45.0,
-            "patents_min": 100, "patents_max": 10000,
-            "emp_growth_min": -15.0, "emp_growth_max": 40.0
+            "rev_growth_min": -20.0, "rev_growth_max": 100.0,
+            "margin_min": -20.0, "margin_max": 60.0,
+            "mcap_min": 5.0, "mcap_max": 4000.0, # Billion USD
+            "mkt_share_min": 0.0, "mkt_share_max": 90.0,
+            "inv_min": 0.5, "inv_max": 80.0,
+            "rd_min": 0.5, "rd_max": 80.0,
+            "patents_min": 100, "patents_max": 25000,
+            "emp_growth_min": -15.0, "emp_growth_max": 50.0
         }
 
         # 1. Financial Strength (20%): Blend of revenue growth & profit margin
@@ -122,13 +122,13 @@ class ScoringEngine:
         w = weights or cls.DEFAULT_TECH_WEIGHTS
 
         stats = cohort_stats or {
-            "inv_min": 1.0, "inv_max": 200.0, # Billion USD
-            "patents_min": 500, "patents_max": 60000,
-            "papers_min": 200, "papers_max": 30000,
-            "adoption_min": 0.0, "adoption_max": 90.0,
-            "growth_min": 5.0, "growth_max": 70.0, # % CAGR
-            "startups_min": 50, "startups_max": 5000,
-            "jobs_min": 5, "jobs_max": 300 # thousands
+            "inv_min": 1.0, "inv_max": 600.0, # Billion USD
+            "patents_min": 500, "patents_max": 100000,
+            "papers_min": 200, "papers_max": 100000,
+            "adoption_min": 0.0, "adoption_max": 100.0,
+            "growth_min": 5.0, "growth_max": 80.0, # % CAGR
+            "startups_min": 50, "startups_max": 10000,
+            "jobs_min": 5, "jobs_max": 800 # thousands
         }
 
         # 1. Investment (20%): Global funding & VC

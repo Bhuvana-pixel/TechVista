@@ -24,6 +24,7 @@ class Company(Base):
     industry = Column(String(100), index=True, nullable=False)
     sector = Column(String(100), nullable=True)
     country = Column(String(50), default="United States", index=True)
+    state = Column(String(100), nullable=True, index=True)
     website = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
     logo_url = Column(String(255), nullable=True)

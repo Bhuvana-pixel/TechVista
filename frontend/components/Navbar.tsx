@@ -19,7 +19,8 @@ import {
   ChevronDown,
   ArrowRight,
   ExternalLink,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Globe
 } from "lucide-react";
 import ApiService from "@/lib/api";
 import GlobalSearchModal from "./GlobalSearchModal";
@@ -32,9 +33,10 @@ interface NavItem {
   badge?: string;
 }
 
-// 5 Core links directly visible on desktop
+// Core links directly visible on desktop
 const MAIN_NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Dashboard", icon: Activity },
+  { href: "/geographic", label: "Geographic Insights", icon: Globe, badge: "New" },
   { href: "/companies", label: "Companies", icon: Building2 },
   { href: "/technologies", label: "Technologies", icon: Cpu },
   { href: "/rankings", label: "Rankings", icon: Trophy },

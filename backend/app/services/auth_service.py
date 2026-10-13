@@ -1,7 +1,7 @@
 import bcrypt
 from datetime import datetime, timedelta
 from typing import Optional
-from jose import JWTError, jwt
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -43,7 +43,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         if email is None:
             raise credentials_exception
         token_data = TokenData(email=email, role=payload.get("role"))
-    except JWTError:
+    except (jwt.PyJWTError, Exception):
         raise credentials_exception
 
     user = db.query(User).filter(User.email == token_data.email).first()

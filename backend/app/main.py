@@ -1,9 +1,16 @@
+import os
+import sys
 import time
 import logging
+from contextlib import asynccontextmanager
+
+# Ensure backend directory is in sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.config import settings
 from app.database import engine, Base
@@ -19,6 +26,7 @@ from app.routers import (
     data_sources,
     admin,
     ml,
+    geographic,
 )
 
 # Configure logging
@@ -31,16 +39,8 @@ logger = logging.getLogger("TechVista")
 # Create database tables automatically if not present
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(
-    title="TechVista API",
-    description="AI-Powered Company and Technology Leadership Analytics & Forecasting Platform API",
-    version=settings.VERSION,
-    docs_url="/docs",
-    redoc_url="/redoc"
-)
-
-@app.on_event("startup")
-def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     """Verify database connectivity and auto-seed if empty on initial cloud deployment."""
     try:
         from app.models.entities import Company
@@ -55,6 +55,16 @@ def on_startup():
             logger.info("Auto-seeding completed successfully.")
     except Exception as e:
         logger.warning(f"Startup auto-seed check notice: {e}")
+    yield
+
+app = FastAPI(
+    title="TechVista API",
+    description="AI-Powered Company and Technology Leadership Analytics & Forecasting Platform API",
+    version=settings.VERSION,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan
+)
 
 # CORS Configuration
 app.add_middleware(
@@ -90,7 +100,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         detail_msg = "An internal server error occurred. Please try again later."
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": detail_msg, "timestamp": datetime.utcnow().isoformat()}
+        content={"detail": detail_msg, "timestamp": datetime.now(timezone.utc).isoformat()}
     )
 
 # Include API Routers under /api
@@ -105,6 +115,7 @@ app.include_router(news.router, prefix=settings.API_PREFIX)
 app.include_router(data_sources.router, prefix=settings.API_PREFIX)
 app.include_router(admin.router, prefix=settings.API_PREFIX)
 app.include_router(ml.router, prefix=settings.API_PREFIX)
+app.include_router(geographic.router, prefix=settings.API_PREFIX)
 
 @app.get("/", tags=["Health"])
 def root_endpoint():
@@ -114,7 +125,7 @@ def root_endpoint():
         "version": settings.VERSION,
         "status": "OPERATIONAL",
         "docs": "/docs",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
 @app.get("/api/health", tags=["Health"])
@@ -125,5 +136,6 @@ def health_check():
         "environment": settings.ENVIRONMENT,
         "database": "connected",
         "uptime": "active",
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(timezone.utc).isoformat()
     }
+

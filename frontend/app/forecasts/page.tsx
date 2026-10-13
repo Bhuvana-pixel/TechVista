@@ -13,16 +13,24 @@ import {
 import ApiService from "@/lib/api";
 import { Company, Technology, ForecastResponse } from "@/lib/types";
 import ForecastScenarioChart from "@/components/Charts/ForecastScenarioChart";
+import LocationFilterBar from "@/components/LocationFilterBar";
+
+import { Trophy, ArrowUpRight, Crown } from "lucide-react";
 
 export default function ForecastsPage() {
   const [entityType, setEntityType] = useState<"company" | "technology">("company");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [technologies, setTechnologies] = useState<Technology[]>([]);
+  const [countryFilter, setCountryFilter] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
+
   const [selectedId, setSelectedId] = useState<number>(1);
   const [forecast, setForecast] = useState<ForecastResponse | null>(null);
+  const [leaderboard, setLeaderboard] = useState<any>(null);
+  const [activeHorizonYr, setActiveHorizonYr] = useState<number>(2030);
   const [loading, setLoading] = useState(false);
 
-  // Load companies & technologies catalogs
+  // Load initial companies and technologies
   useEffect(() => {
     const fetchEntities = async () => {
       try {
@@ -39,6 +47,41 @@ export default function ForecastsPage() {
     };
     fetchEntities();
   }, []);
+
+  // Fetch forecast leaderboard whenever location filters change
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const queryParts: string[] = [];
+        if (countryFilter !== "all") queryParts.push(`country=${encodeURIComponent(countryFilter)}`);
+        if (stateFilter !== "all") queryParts.push(`state=${encodeURIComponent(stateFilter)}`);
+        const lbRes = await ApiService.getForecastLeaderboard(queryParts.join("&"));
+        setLeaderboard(lbRes);
+      } catch (e) {
+        console.error("Leaderboard load error", e);
+      }
+    };
+    fetchLeaderboard();
+  }, [countryFilter, stateFilter]);
+
+  // Compute filtered companies list based on location
+  const filteredCompanies = companies.filter((c) => {
+    const matchesCountry = countryFilter === "all" || c.country === countryFilter;
+    const matchesState = stateFilter === "all" || c.state === stateFilter;
+    return matchesCountry && matchesState;
+  });
+
+  // Auto-adjust selectedId when location filters change if current selection is not in filtered list
+  useEffect(() => {
+    if (entityType === "company") {
+      if (filteredCompanies.length > 0) {
+        const isCurrentValid = filteredCompanies.some((c) => c.id === selectedId);
+        if (!isCurrentValid) {
+          setSelectedId(filteredCompanies[0].id);
+        }
+      }
+    }
+  }, [countryFilter, stateFilter, entityType, companies]);
 
   // Whenever entityType or selectedId changes, fetch forecast
   useEffect(() => {
@@ -62,15 +105,15 @@ export default function ForecastsPage() {
 
   const handleTypeChange = (type: "company" | "technology") => {
     setEntityType(type);
-    if (type === "company" && companies.length > 0) {
-      setSelectedId(companies[0].id);
+    if (type === "company" && filteredCompanies.length > 0) {
+      setSelectedId(filteredCompanies[0].id);
     } else if (type === "technology" && technologies.length > 0) {
       setSelectedId(technologies[0].id);
     }
   };
 
-  const currentList = entityType === "company" ? companies : technologies;
-  const currentEntity = currentList.find((x) => x.id === selectedId);
+  const currentList = entityType === "company" ? filteredCompanies : technologies;
+  const currentHorizonData = leaderboard?.horizons?.[String(activeHorizonYr)];
 
   return (
     <div className="space-y-6 pb-12">
@@ -88,46 +131,174 @@ export default function ForecastsPage() {
         </p>
       </div>
 
-      {/* Control Panel: Type Switcher & Entity Dropdown */}
-      <div className="glass-panel p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-        {/* Type Toggle */}
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
-          <button
-            onClick={() => handleTypeChange("company")}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              entityType === "company"
-                ? "bg-primary text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <Building2 className="h-3.5 w-3.5" /> Companies
-          </button>
-          <button
-            onClick={() => handleTypeChange("technology")}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              entityType === "technology"
-                ? "bg-violet-600 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <Cpu className="h-3.5 w-3.5" /> Technologies
-          </button>
+      {/* Rank #1 Projected Leaders Showcase */}
+      {leaderboard && leaderboard.horizons && (
+        <div className="glass-panel p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+            <div>
+              <div className="flex items-center gap-2">
+                <Crown className="h-4 w-4 text-amber-500" />
+                <h3 className="text-sm font-bold text-slate-900">
+                  Predicted Horizon Rank #1 Leaders ({activeHorizonYr})
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500">
+                Top predicted Company and Technology Domain projected to lead the global market in {activeHorizonYr}
+              </p>
+            </div>
+
+            {/* Horizon Year Tabs */}
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+              {[2027, 2030, 2035, 2040].map((yr) => (
+                <button
+                  key={yr}
+                  onClick={() => setActiveHorizonYr(yr)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold font-mono transition ${
+                    activeHorizonYr === yr
+                      ? "bg-white text-blue-600 shadow-xs border border-slate-200"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {yr}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {currentHorizonData && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Top Company #1 Leader */}
+              {currentHorizonData.top_company && (
+                <div className="p-4 rounded-xl bg-gradient-to-br from-amber-50/60 to-orange-50/40 border border-amber-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold font-mono">
+                      <Trophy className="h-3 w-3 text-amber-600" /> RANK #1 COMPANY ({activeHorizonYr})
+                    </span>
+                    <span className="text-xs font-mono font-bold text-emerald-700">
+                      Score: {currentHorizonData.top_company.leadership_score.toFixed(1)}/100
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                      <span>{currentHorizonData.top_company.name}</span>
+                      <span className="text-xs font-mono font-semibold text-slate-500">
+                        ({currentHorizonData.top_company.ticker})
+                      </span>
+                    </h4>
+                    <p className="text-xs text-slate-600 font-medium">
+                      {currentHorizonData.top_company.industry} • {currentHorizonData.top_company.country}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between text-xs pt-1 border-t border-amber-200/50">
+                    <span className="text-slate-600 font-medium">
+                      Leadership Probability: <strong className="text-blue-700 font-mono">{Math.round(currentHorizonData.top_company.probability * 100)}%</strong>
+                    </span>
+                    <button
+                      onClick={() => { setEntityType("company"); setSelectedId(currentHorizonData.top_company.id); }}
+                      className="text-amber-800 font-bold hover:underline flex items-center gap-0.5 text-[11px]"
+                    >
+                      View Full Curve <ArrowUpRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Top Technology #1 Leader */}
+              {currentHorizonData.top_technology && (
+                <div className="p-4 rounded-xl bg-gradient-to-br from-violet-50/60 to-purple-50/40 border border-violet-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-100 text-violet-800 text-[10px] font-bold font-mono">
+                      <Sparkles className="h-3 w-3 text-violet-600" /> RANK #1 TECH DOMAIN ({activeHorizonYr})
+                    </span>
+                    <span className="text-xs font-mono font-bold text-emerald-700">
+                      Score: {currentHorizonData.top_technology.leadership_score.toFixed(1)}/100
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold text-slate-900">
+                      {currentHorizonData.top_technology.name}
+                    </h4>
+                    <p className="text-xs text-slate-600 font-medium">
+                      Category: {currentHorizonData.top_technology.category}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between text-xs pt-1 border-t border-violet-200/50">
+                    <span className="text-slate-600 font-medium">
+                      Leadership Probability: <strong className="text-violet-700 font-mono">{Math.round(currentHorizonData.top_technology.probability * 100)}%</strong>
+                    </span>
+                    <button
+                      onClick={() => { setEntityType("technology"); setSelectedId(currentHorizonData.top_technology.id); }}
+                      className="text-violet-800 font-bold hover:underline flex items-center gap-0.5 text-[11px]"
+                    >
+                      View Full Curve <ArrowUpRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Control Panel: Type Switcher, Geographic Location Filter & Entity Dropdown */}
+      <div className="glass-panel p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Type Toggle */}
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button
+              onClick={() => handleTypeChange("company")}
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                entityType === "company"
+                  ? "bg-primary text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <Building2 className="h-3.5 w-3.5" /> Companies
+            </button>
+            <button
+              onClick={() => handleTypeChange("technology")}
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                entityType === "technology"
+                  ? "bg-violet-600 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <Cpu className="h-3.5 w-3.5" /> Technologies
+            </button>
+          </div>
+
+          {/* Location Filters for Companies */}
+          {entityType === "company" && (
+            <LocationFilterBar
+              country={countryFilter}
+              state={stateFilter}
+              onCountryChange={setCountryFilter}
+              onStateChange={setStateFilter}
+              compact={true}
+            />
+          )}
         </div>
 
         {/* Entity Selector */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-3 w-full sm:w-auto">
-          <span className="text-xs text-slate-500 font-medium whitespace-nowrap">Select Target:</span>
-          <select
-            value={selectedId}
-            onChange={(e) => setSelectedId(Number(e.target.value))}
-            className="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:border-primary min-w-[200px]"
-          >
-            {currentList.map((item) => (
-              <option key={item.id} value={item.id}>
-                {"ticker" in item && item.ticker ? `${item.ticker} - ${item.name}` : item.name}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1.5 sm:gap-3 w-full lg:w-auto">
+          <span className="text-xs text-slate-500 font-medium whitespace-nowrap">Target Entity:</span>
+          {currentList.length === 0 ? (
+            <span className="text-xs text-amber-600 font-semibold bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
+              No entities in selected location
+            </span>
+          ) : (
+            <select
+              value={selectedId}
+              onChange={(e) => setSelectedId(Number(e.target.value))}
+              className="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-900 focus:outline-none focus:border-primary min-w-[220px]"
+            >
+              {currentList.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {"ticker" in item && item.ticker ? `${item.ticker} - ${item.name}` : item.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from app.database import get_db
 from app.models.entities import Company, CompanyMetric, Technology, TechnologyMetric, Prediction
@@ -106,3 +106,89 @@ def get_technology_forecast(technology_id: int, db: Session = Depends(get_db)):
         forecasts=forecast_items,
         disclaimer=DISCLAIMER_TEXT
     )
+
+@router.get("/leaderboard")
+def get_forecast_leaderboard(
+    country: Optional[str] = Query(None, description="Filter leaderboard by country"),
+    state: Optional[str] = Query(None, description="Filter leaderboard by state"),
+    db: Session = Depends(get_db)
+):
+    """Returns top predicted Company and Technology Rank #1 Leaders for 2027, 2030, 2035, and 2040."""
+    target_years = [2027, 2030, 2035, 2040]
+    leaderboard_by_year = {}
+
+    for yr in target_years:
+        # Top Companies for target year
+        comp_query = db.query(Prediction, Company).join(
+            Company, Prediction.entity_id == Company.id
+        ).filter(
+            Prediction.entity_type == "company",
+            Prediction.prediction_year == yr
+        )
+
+        if country:
+            comp_query = comp_query.filter(Company.country == country)
+        if state:
+            comp_query = comp_query.filter(Company.state == state)
+
+        comp_preds = comp_query.order_by(
+            Prediction.leadership_score.desc(),
+            Prediction.future_potential.desc(),
+            Prediction.probability.desc()
+        ).limit(5).all()
+
+        top_companies = []
+        for p, c in comp_preds:
+            top_companies.append({
+                "id": c.id,
+                "name": c.name,
+                "ticker": c.ticker,
+                "industry": c.industry,
+                "country": c.country,
+                "state": c.state,
+                "logo_url": c.logo_url,
+                "leadership_score": p.leadership_score,
+                "future_potential": p.future_potential,
+                "probability": p.probability,
+                "confidence": p.confidence,
+                "explanation": p.explanation
+            })
+
+        # Top Technologies for target year
+        tech_preds = db.query(Prediction, Technology).join(
+            Technology, Prediction.entity_id == Technology.id
+        ).filter(
+            Prediction.entity_type == "technology",
+            Prediction.prediction_year == yr
+        ).order_by(
+            Prediction.leadership_score.desc(),
+            Prediction.future_potential.desc(),
+            Prediction.probability.desc()
+        ).limit(5).all()
+
+        top_techs = []
+        for p, t in tech_preds:
+            top_techs.append({
+                "id": t.id,
+                "name": t.name,
+                "category": t.category,
+                "leadership_score": p.leadership_score,
+                "future_potential": p.future_potential,
+                "probability": p.probability,
+                "confidence": p.confidence,
+                "explanation": p.explanation
+            })
+
+        leaderboard_by_year[str(yr)] = {
+            "year": yr,
+            "top_company": top_companies[0] if top_companies else None,
+            "top_technology": top_techs[0] if top_techs else None,
+            "company_rankings": top_companies,
+            "technology_rankings": top_techs
+        }
+
+    return {
+        "disclaimer": DISCLAIMER_TEXT,
+        "horizons": leaderboard_by_year
+    }
+

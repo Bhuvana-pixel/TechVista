@@ -1,11 +1,21 @@
 name,category,description,website
-Generative AI,Artificial Intelligence,"Large foundational models transforming text, video, software synthesis, and multi-modal creative production.",https://techvista.ai/tech/genai
-Artificial Intelligence,Core Computing,"Broad AI encompassing machine learning, deep neural networks, reinforcement learning, and autonomous reasoning systems.",https://techvista.ai/tech/ai
-Robotics & Embodied AI,Automation,Humanoid robots and physical automation systems integrating multi-modal perception with end-to-end motor control.,https://techvista.ai/tech/robotics
-Quantum Computing,Frontier Physics,"Superconducting and ion-trap quantum hardware solving complex combinatorial optimization, cryptography, and molecular simulation.",https://techvista.ai/tech/quantum
-Edge Computing,Infrastructure,Decentralized computing architecture processing low-latency inferencing at device perimeter nodes.,https://techvista.ai/tech/edge
-Cloud Computing,Enterprise Systems,"Hyperscale distributed infrastructure providing elastic compute, serverless frameworks, and high-performance clusters.",https://techvista.ai/tech/cloud
-Cybersecurity & Zero Trust,Security,"AI-driven defensive telemetry, automated anomaly mitigation, and post-quantum cryptographic standards.",https://techvista.ai/tech/cyber
-Autonomous Vehicles,Transportation,Level 4 and Level 5 autonomous driving stacks driven by vision end-to-end foundation models.,https://techvista.ai/tech/av
-AR / VR & Spatial Computing,Human-Machine Interface,"High-fidelity pass-through headsets, spatial audio, and neural interfaces bridging physical and synthetic environments.",https://techvista.ai/tech/spatial
-6G & Next-Gen Connectivity,Telecommunications,"Terahertz-band telecommunications featuring integrated sensing, microsecond latency, and satellite mesh networking.",https://techvista.ai/tech/6g
+Artificial Intelligence,Artificial Intelligence,"Foundational AI models, intelligent agents, generative text/code synthesis, and automated decision-making engines.",https://techvista.ai/tech/ai
+Machine Learning,Artificial Intelligence,"Supervised, unsupervised, and reinforcement learning algorithms, predictive neural networks, and model training infrastructure.",https://techvista.ai/tech/ml
+Cloud Computing,Cloud & Infrastructure,"Hyperscale cloud infrastructure, elastic virtual compute, serverless frameworks, and hybrid cloud storage platforms.",https://techvista.ai/tech/cloud
+Edge Computing,Cloud & Infrastructure,Decentralized computing architecture processing data and AI model inferencing directly at local device perimeter nodes.,https://techvista.ai/tech/edge
+Cybersecurity,Cybersecurity,"Zero trust security, identity access management, threat detection telemetry, and continuous cloud vulnerability defense.",https://techvista.ai/tech/cyber
+Data Platforms & Big Data,Data Platforms,"Cloud data warehousing, data lakes, real-time data streaming pipelines, and high-dimensional vector databases.",https://techvista.ai/tech/bigdata
+Semiconductors & Chip Design,Hardware & Chips,"Advanced silicon microprocessors, AI acceleration chips, foundry manufacturing, and electronic design automation (EDA).",https://techvista.ai/tech/semiconductors
+DevOps & Software Engineering,Developer Tools,"Continuous Integration/Continuous Deployment (CI/CD) pipelines, infrastructure as code, automated testing, and developer productivity tools.",https://techvista.ai/tech/devops
+Enterprise SaaS & CRM,Enterprise SaaS,"Cloud business applications including customer relationship management, enterprise resource planning, and financial workflow software.",https://techvista.ai/tech/saas
+Internet of Things (IoT),Cloud & Infrastructure,"Connected smart sensors, embedded hardware, device management platforms, and industrial telemetry networks.",https://techvista.ai/tech/iot
+Quantum Computing,Frontier Computing,"Quantum processors, trapped-ion qubits, and specialized quantum algorithms solving complex optimization and encryption challenges.",https://techvista.ai/tech/quantum
+High-Performance Computing (HPC),Cloud & Infrastructure,"Supercomputing clusters, high-speed interconnects, and petascale GPU processing for intensive compute workloads.",https://techvista.ai/tech/hpc
+Robotic Process Automation (RPA),Enterprise SaaS,Software bots and intelligent automation tools that automate repetitive enterprise workflows and data processing.,https://techvista.ai/tech/rpa
+Natural Language Processing (NLP),Artificial Intelligence,"Semantic language understanding, automated speech recognition, translation, and conversational voice/chat agents.",https://techvista.ai/tech/nlp
+Computer Vision,Artificial Intelligence,"Visual image recognition, video analytical telemetry, pattern detection, and automated inspection systems.",https://techvista.ai/tech/computervision
+API & Microservices Architecture,Developer Tools,"API gateways, microservices container orchestration (Kubernetes), and software integration protocols.",https://techvista.ai/tech/microservices
+Database Systems,Data Platforms,"Distributed relational SQL, NoSQL document databases, and high-performance in-memory caching systems.",https://techvista.ai/tech/databases
+Network Infrastructure & 5G,Cloud & Infrastructure,"High-speed data center switches, software-defined networking (SDN), 5G wireless networks, and content delivery networks (CDN).",https://techvista.ai/tech/networking
+Low-Code / No-Code Automation,Enterprise SaaS,Drag-and-drop visual application development platforms democratizing software creation for business enterprise users.,https://techvista.ai/tech/lowcode
+IT Services & Digital Transformation,IT Services,"Enterprise IT consulting, cloud migration frameworks, legacy systems modernization, and digital architecture services.",https://techvista.ai/tech/itservices

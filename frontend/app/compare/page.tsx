@@ -14,6 +14,7 @@ import {
 import ApiService from "@/lib/api";
 import { Company, Technology } from "@/lib/types";
 import RadarComparisonChart from "@/components/Charts/RadarComparisonChart";
+import LocationFilterBar from "@/components/LocationFilterBar";
 
 const ENTITY_COLORS = ["#2563eb", "#059669", "#7c3aed", "#d97706"];
 
@@ -21,6 +22,8 @@ export default function ComparePage() {
   const [mode, setMode] = useState<"companies" | "technologies">("companies");
   const [allCompanies, setAllCompanies] = useState<Company[]>([]);
   const [allTechnologies, setAllTechnologies] = useState<Technology[]>([]);
+  const [countryFilter, setCountryFilter] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
 
   // Selected IDs (defaults: first 2)
   const [selectedCompIds, setSelectedCompIds] = useState<number[]>([1, 2]);
@@ -45,6 +48,13 @@ export default function ComparePage() {
     };
     fetchMaster();
   }, []);
+
+  // Filter companies based on location filter
+  const filteredCompanies = allCompanies.filter((c) => {
+    const matchesCountry = countryFilter === "all" || c.country === countryFilter;
+    const matchesState = stateFilter === "all" || c.state === stateFilter;
+    return matchesCountry && matchesState;
+  });
 
   // Fetch comparison whenever selection changes
   useEffect(() => {
@@ -95,7 +105,7 @@ export default function ComparePage() {
   };
 
   const currentSelection = mode === "companies" ? selectedCompIds : selectedTechIds;
-  const masterList = mode === "companies" ? allCompanies : allTechnologies;
+  const masterList = mode === "companies" ? filteredCompanies : allTechnologies;
 
   // Build radar entity keys
   const radarEntityKeys = compareData?.entities?.map((e: any, idx: number) => ({
@@ -123,7 +133,7 @@ export default function ComparePage() {
       {/* Mode Switcher */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-b border-slate-200 pb-2">
         <button
-          onClick={() => setMode("companies")}
+          onClick={() => { setCompareData(null); setMode("companies"); }}
           className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
             mode === "companies"
               ? "bg-primary text-white shadow-sm shadow-blue-500/20"
@@ -134,7 +144,7 @@ export default function ComparePage() {
           Compare Companies (Max 4)
         </button>
         <button
-          onClick={() => setMode("technologies")}
+          onClick={() => { setCompareData(null); setMode("technologies"); }}
           className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition ${
             mode === "technologies"
               ? "bg-violet-600 text-white shadow-sm shadow-violet-500/20"
@@ -147,14 +157,26 @@ export default function ComparePage() {
       </div>
 
       {/* Entity Selector Pills */}
-      <div className="glass-panel p-4 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="flex items-center justify-between mb-3 text-xs">
-          <span className="font-semibold text-slate-800">
-            Selected Cohort ({currentSelection.length}/4 maximum):
-          </span>
-          <span className="text-[11px] text-slate-500">
-            Click to add or remove an entity
-          </span>
+      <div className="glass-panel p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div>
+            <span className="font-semibold text-slate-800">
+              Selected Cohort ({currentSelection.length}/4 maximum):
+            </span>
+            <span className="text-[11px] text-slate-500 block">
+              Click to add or remove an entity for multi-dimensional radar comparison
+            </span>
+          </div>
+
+          {mode === "companies" && (
+            <LocationFilterBar
+              country={countryFilter}
+              state={stateFilter}
+              onCountryChange={setCountryFilter}
+              onStateChange={setStateFilter}
+              compact={true}
+            />
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -240,7 +262,7 @@ export default function ComparePage() {
                     <td className="px-4 py-3 font-bold text-slate-900">Leadership Score</td>
                     {compareData.entities.map((e: any) => (
                       <td key={e.id} className="px-4 py-3 text-right font-mono font-bold text-sm text-emerald-600">
-                        {e.leadership_score.toFixed(1)}
+                        {(e.leadership_score ?? 0).toFixed(1)}
                       </td>
                     ))}
                   </tr>
@@ -249,7 +271,7 @@ export default function ComparePage() {
                     <td className="px-4 py-3 font-semibold text-slate-700">Future Potential Ceiling</td>
                     {compareData.entities.map((e: any) => (
                       <td key={e.id} className="px-4 py-3 text-right font-mono font-bold text-xs text-blue-600">
-                        {e.future_potential.toFixed(1)}
+                        {(e.future_potential ?? 0).toFixed(1)}
                       </td>
                     ))}
                   </tr>
@@ -258,7 +280,7 @@ export default function ComparePage() {
                     <td className="px-4 py-3 font-semibold text-slate-700">Leadership Probability</td>
                     {compareData.entities.map((e: any) => (
                       <td key={e.id} className="px-4 py-3 text-right font-mono font-semibold text-xs text-violet-600">
-                        {Math.round(e.probability * 100)}%
+                        {Math.round((e.probability ?? 0) * 100)}%
                       </td>
                     ))}
                   </tr>
@@ -270,7 +292,7 @@ export default function ComparePage() {
                         <td className="px-4 py-3 text-slate-600">Market Capitalization</td>
                         {compareData.entities.map((e: any) => (
                           <td key={e.id} className="px-4 py-3 text-right font-mono text-slate-900 font-semibold">
-                            ${e.raw_metrics.market_cap.toFixed(1)}B
+                            ${(e.raw_metrics?.market_cap ?? 0).toFixed(1)}B
                           </td>
                         ))}
                       </tr>
@@ -278,7 +300,7 @@ export default function ComparePage() {
                         <td className="px-4 py-3 text-slate-600">Annual Revenue</td>
                         {compareData.entities.map((e: any) => (
                           <td key={e.id} className="px-4 py-3 text-right font-mono text-slate-800">
-                            ${e.raw_metrics.revenue.toFixed(1)}B
+                            ${(e.raw_metrics?.revenue ?? 0).toFixed(1)}B
                           </td>
                         ))}
                       </tr>
@@ -286,7 +308,7 @@ export default function ComparePage() {
                         <td className="px-4 py-3 text-slate-600">Annual R&D Spending</td>
                         {compareData.entities.map((e: any) => (
                           <td key={e.id} className="px-4 py-3 text-right font-mono text-slate-800">
-                            ${e.raw_metrics.rd_spending.toFixed(1)}B
+                            ${(e.raw_metrics?.rd_spending ?? 0).toFixed(1)}B
                           </td>
                         ))}
                       </tr>
@@ -294,7 +316,7 @@ export default function ComparePage() {
                         <td className="px-4 py-3 text-slate-600">Active Patent Count</td>
                         {compareData.entities.map((e: any) => (
                           <td key={e.id} className="px-4 py-3 text-right font-mono text-slate-800">
-                            {e.raw_metrics.patents.toLocaleString()}
+                            {(e.raw_metrics?.patents ?? 0).toLocaleString()}
                           </td>
                         ))}
                       </tr>
@@ -302,7 +324,7 @@ export default function ComparePage() {
                         <td className="px-4 py-3 text-slate-600">Technology Adoption Index</td>
                         {compareData.entities.map((e: any) => (
                           <td key={e.id} className="px-4 py-3 text-right font-mono text-violet-600 font-bold">
-                            {e.raw_metrics.technology_adoption.toFixed(0)}/100
+                            {(e.raw_metrics?.technology_adoption ?? 0).toFixed(0)}/100
                           </td>
                         ))}
                       </tr>
@@ -313,7 +335,7 @@ export default function ComparePage() {
                         <td className="px-4 py-3 text-slate-600">Global Venture Investment</td>
                         {compareData.entities.map((e: any) => (
                           <td key={e.id} className="px-4 py-3 text-right font-mono text-slate-900 font-semibold">
-                            ${e.raw_metrics.investment.toFixed(1)}B
+                            ${(e.raw_metrics?.investment ?? 0).toFixed(1)}B
                           </td>
                         ))}
                       </tr>
@@ -321,7 +343,7 @@ export default function ComparePage() {
                         <td className="px-4 py-3 text-slate-600">Market TAM Size</td>
                         {compareData.entities.map((e: any) => (
                           <td key={e.id} className="px-4 py-3 text-right font-mono text-slate-800">
-                            ${e.raw_metrics.market_size.toFixed(1)}B
+                            ${(e.raw_metrics?.market_size ?? 0).toFixed(1)}B
                           </td>
                         ))}
                       </tr>
@@ -329,7 +351,7 @@ export default function ComparePage() {
                         <td className="px-4 py-3 text-slate-600">Enterprise Adoption Rate</td>
                         {compareData.entities.map((e: any) => (
                           <td key={e.id} className="px-4 py-3 text-right font-mono text-emerald-600 font-bold">
-                            {e.raw_metrics.adoption_rate.toFixed(1)}%
+                            {(e.raw_metrics?.adoption_rate ?? 0).toFixed(1)}%
                           </td>
                         ))}
                       </tr>
@@ -337,7 +359,7 @@ export default function ComparePage() {
                         <td className="px-4 py-3 text-slate-600">Active Startups Tracked</td>
                         {compareData.entities.map((e: any) => (
                           <td key={e.id} className="px-4 py-3 text-right font-mono text-slate-800">
-                            {e.raw_metrics.startup_count.toLocaleString()}
+                            {(e.raw_metrics?.startup_count ?? 0).toLocaleString()}
                           </td>
                         ))}
                       </tr>
@@ -345,7 +367,7 @@ export default function ComparePage() {
                         <td className="px-4 py-3 text-slate-600">Global Job Postings</td>
                         {compareData.entities.map((e: any) => (
                           <td key={e.id} className="px-4 py-3 text-right font-mono text-amber-600 font-bold">
-                            {e.raw_metrics.job_postings}k
+                            {e.raw_metrics?.job_postings ?? 0}k
                           </td>
                         ))}
                       </tr>

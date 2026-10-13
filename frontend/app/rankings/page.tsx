@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import ApiService from "@/lib/api";
 import { RankingItem } from "@/lib/types";
+import LocationFilterBar from "@/components/LocationFilterBar";
 
 export default function RankingsPage() {
   const [tab, setTab] = useState<"companies" | "technologies">("companies");
@@ -22,6 +23,8 @@ export default function RankingsPage() {
   // Filters & Sorting state
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [countryFilter, setCountryFilter] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
   const [minScore, setMinScore] = useState<number>(0);
   const [sortBy, setSortBy] = useState<string>("rank");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -34,6 +37,10 @@ export default function RankingsPage() {
       if (categoryFilter !== "all") {
         if (tab === "companies") queryParts.push(`industry=${encodeURIComponent(categoryFilter)}`);
         else queryParts.push(`category=${encodeURIComponent(categoryFilter)}`);
+      }
+      if (tab === "companies") {
+        if (countryFilter !== "all") queryParts.push(`country=${encodeURIComponent(countryFilter)}`);
+        if (stateFilter !== "all") queryParts.push(`state=${encodeURIComponent(stateFilter)}`);
       }
       if (minScore > 0) queryParts.push(`min_score=${minScore}`);
       queryParts.push(`sort_by=${sortBy}`);
@@ -54,13 +61,15 @@ export default function RankingsPage() {
 
   useEffect(() => {
     setCategoryFilter("all");
+    setCountryFilter("all");
+    setStateFilter("all");
     setSortBy("rank");
     setSortOrder("asc");
   }, [tab]);
 
   useEffect(() => {
     fetchRankings();
-  }, [tab, search, categoryFilter, minScore, sortBy, sortOrder]);
+  }, [tab, search, categoryFilter, countryFilter, stateFilter, minScore, sortBy, sortOrder]);
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
@@ -128,6 +137,16 @@ export default function RankingsPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          {tab === "companies" && (
+            <LocationFilterBar
+              country={countryFilter}
+              state={stateFilter}
+              onCountryChange={setCountryFilter}
+              onStateChange={setStateFilter}
+              compact={true}
+            />
+          )}
+
           {/* Min Score Range Slider */}
           <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
             <span className="text-[11px] text-slate-500 whitespace-nowrap font-medium">Min Score:</span>
@@ -243,7 +262,7 @@ export default function RankingsPage() {
                         </a>
                         {item.ticker && (
                           <span className="font-mono text-[11px] text-slate-500">
-                            {item.ticker} • {item.country}
+                            {item.ticker} • {item.country}{item.state ? ` (${item.state})` : ""}
                           </span>
                         )}
                       </td>

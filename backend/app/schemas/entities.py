@@ -1,27 +1,26 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 # ================= AUTH SCHEMAS =================
 class UserCreate(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
-    email: EmailStr
+    email: str
     password: str = Field(..., min_length=6)
     role: Optional[str] = "user"
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
-    email: EmailStr
+    email: str
     role: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
@@ -35,6 +34,8 @@ class TokenData(BaseModel):
 
 # ================= COMPANY SCHEMAS =================
 class CompanyMetricOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     year: int
     revenue: float
@@ -53,16 +54,16 @@ class CompanyMetricOut(BaseModel):
     sentiment_score: float
     innovation_score: float
 
-    class Config:
-        from_attributes = True
-
 class CompanyOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     ticker: str
     industry: str
     sector: Optional[str] = None
     country: str
+    state: Optional[str] = None
     website: Optional[str] = None
     description: Optional[str] = None
     logo_url: Optional[str] = None
@@ -70,9 +71,6 @@ class CompanyOut(BaseModel):
     future_potential: Optional[float] = None
     probability: Optional[float] = None
     rank: Optional[int] = None
-
-    class Config:
-        from_attributes = True
 
 class CompanyDetailOut(CompanyOut):
     metrics: List[CompanyMetricOut] = []
@@ -85,6 +83,8 @@ class CompanyDetailOut(CompanyOut):
 
 # ================= TECHNOLOGY SCHEMAS =================
 class TechnologyMetricOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     year: int
     investment: float
@@ -99,10 +99,9 @@ class TechnologyMetricOut(BaseModel):
     sentiment_score: float
     innovation_score: float
 
-    class Config:
-        from_attributes = True
-
 class TechnologyOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     category: str
@@ -112,9 +111,6 @@ class TechnologyOut(BaseModel):
     future_potential: Optional[float] = None
     probability: Optional[float] = None
     rank: Optional[int] = None
-
-    class Config:
-        from_attributes = True
 
 class TechnologyDetailOut(TechnologyOut):
     metrics: List[TechnologyMetricOut] = []
@@ -127,6 +123,8 @@ class TechnologyDetailOut(TechnologyOut):
 
 # ================= PREDICTION & FORECAST SCHEMAS =================
 class PredictionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     entity_type: str
     entity_id: int
@@ -139,9 +137,6 @@ class PredictionOut(BaseModel):
     explanation: Optional[str] = None
     model_version: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class ForecastItem(BaseModel):
     year: int
@@ -174,6 +169,7 @@ class CompanyRankingItem(BaseModel):
     ticker: str
     industry: str
     country: str
+    state: Optional[str] = None
     leadership_score: float
     future_potential: float
     probability: float
@@ -219,6 +215,8 @@ class DashboardResponse(BaseModel):
 
 # ================= NEWS SCHEMAS =================
 class NewsOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     title: str
     source: str
@@ -229,12 +227,11 @@ class NewsOut(BaseModel):
     company_name: Optional[str] = None
     technology_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-
 
 # ================= DATA SOURCE & ADMIN SCHEMAS =================
 class DataSourceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     source_type: str
@@ -242,10 +239,9 @@ class DataSourceOut(BaseModel):
     last_updated: datetime
     status: str
 
-    class Config:
-        from_attributes = True
-
 class ModelVersionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     model_name: str
     version: str
@@ -256,10 +252,9 @@ class ModelVersionOut(BaseModel):
     status: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 class IngestionLogOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     source: str
     status: str
@@ -267,9 +262,6 @@ class IngestionLogOut(BaseModel):
     started_at: datetime
     completed_at: Optional[datetime] = None
     error_message: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 class SystemStatusOut(BaseModel):
     backend_status: str

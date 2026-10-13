@@ -15,7 +15,7 @@ def get_technologies(
     search: Optional[str] = Query(None, description="Search by technology name"),
     category: Optional[str] = Query(None, description="Filter by category"),
     skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=100),
+    limit: int = Query(500, ge=1, le=1000),
     db: Session = Depends(get_db)
 ):
     query = db.query(Technology)

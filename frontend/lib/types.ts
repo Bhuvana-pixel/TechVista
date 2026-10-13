@@ -25,6 +25,7 @@ export interface Company {
   industry: string;
   sector?: string;
   country: string;
+  state?: string;
   website?: string;
   description?: string;
   logo_url?: string;
@@ -32,6 +33,11 @@ export interface Company {
   future_potential?: number;
   probability?: number;
   rank?: number;
+}
+
+export interface CompanyLocationsResponse {
+  countries: string[];
+  states: Record<string, string[]>;
 }
 
 export interface FactorItem {
@@ -115,6 +121,7 @@ export interface RankingItem {
   category?: string;
   industry?: string;
   country?: string;
+  state?: string;
   leadership_score: number;
   future_potential: number;
   probability: number;
@@ -227,6 +234,71 @@ export interface SystemStatus {
   active_model_technologies: string;
   total_companies: number;
   total_technologies: number;
-  total_metrics_records: number;
-  memory_usage_mb: number;
+  total_predictions: number;
+  total_metrics_records?: number;
+  memory_usage_mb?: number;
+}
+
+export interface GeoCompanyRankingItem {
+  id: number;
+  rank: number;
+  is_tied: boolean;
+  name: string;
+  ticker: string;
+  industry: string;
+  country: string;
+  state: string;
+  score: number;
+  baseline_score: number;
+  future_potential: number;
+  probability: number;
+  logo_url?: string;
+}
+
+export interface GeoTechnologyRankingItem {
+  id: number;
+  rank: number;
+  is_tied: boolean;
+  name: string;
+  category: string;
+  score: number;
+  baseline_score: number;
+  future_potential: number;
+  adoption_rate: number;
+  market_size: number;
+  regional_indicator: string;
+}
+
+export interface GeoCompaniesResponse {
+  country: string;
+  state: string;
+  year: number;
+  top_n: number;
+  data_available: boolean;
+  message?: string;
+  companies: GeoCompanyRankingItem[];
+}
+
+export interface GeoTechnologiesResponse {
+  country: string;
+  state: string;
+  year: number;
+  top_n: number;
+  data_available: boolean;
+  message?: string;
+  technologies: GeoTechnologyRankingItem[];
+}
+
+export interface CountryOverviewCard {
+  country: string;
+  companies_count: number;
+  top_companies: GeoCompanyRankingItem[];
+  top_technologies: GeoTechnologyRankingItem[];
+}
+
+export interface GeoOverviewResponse {
+  year: number;
+  top_n: number;
+  total_countries: number;
+  countries: CountryOverviewCard[];
 }

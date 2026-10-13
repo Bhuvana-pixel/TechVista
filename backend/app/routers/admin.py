@@ -7,7 +7,7 @@ except ImportError:
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 from app.database import get_db
@@ -128,7 +128,40 @@ async def upload_csv_dataset(
                         sentiment_score=float(r.get("sentiment_score", 0.0)),
                         innovation_score=float(r.get("innovation_score", 50.0))
                     )
-                    db.add(new_m)
+                inserted_count += 1
+
+        elif dataset_type == "technology_metrics":
+            for r in records:
+                tech_name = str(r.get("technology_name", r.get("name", ""))).strip()
+                tech = db.query(Technology).filter(Technology.name.ilike(tech_name)).first()
+                if not tech:
+                    continue
+                yr = int(r["year"])
+                existing_m = db.query(TechnologyMetric).filter(TechnologyMetric.technology_id == tech.id, TechnologyMetric.year == yr).first()
+                if existing_m:
+                    existing_m.investment = float(r.get("investment", existing_m.investment))
+                    existing_m.patent_count = int(r.get("patent_count", existing_m.patent_count))
+                    existing_m.research_papers = int(r.get("research_papers", existing_m.research_papers))
+                    existing_m.adoption_rate = float(r.get("adoption_rate", existing_m.adoption_rate))
+                    existing_m.market_size = float(r.get("market_size", existing_m.market_size))
+                    existing_m.market_growth = float(r.get("market_growth", existing_m.market_growth))
+                else:
+                    new_tm = TechnologyMetric(
+                        technology_id=tech.id,
+                        year=yr,
+                        investment=float(r.get("investment", 0.0)),
+                        patent_count=int(r.get("patent_count", 0)),
+                        research_papers=int(r.get("research_papers", 0)),
+                        adoption_rate=float(r.get("adoption_rate", 10.0)),
+                        market_size=float(r.get("market_size", 0.0)),
+                        market_growth=float(r.get("market_growth", 0.0)),
+                        startup_count=int(r.get("startup_count", 100)),
+                        job_postings=int(r.get("job_postings", 500)),
+                        industry_interest=float(r.get("industry_interest", 50.0)),
+                        sentiment_score=float(r.get("sentiment_score", 0.0)),
+                        innovation_score=float(r.get("innovation_score", 50.0))
+                    )
+                    db.add(new_tm)
                 inserted_count += 1
 
         db.commit()
@@ -138,7 +171,7 @@ async def upload_csv_dataset(
             source=f"CSV Upload: {file.filename} ({dataset_type})",
             status="SUCCESS",
             records_processed=inserted_count,
-            completed_at=datetime.utcnow()
+            completed_at=datetime.now(timezone.utc)
         )
         db.add(log)
         db.commit()
